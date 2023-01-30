@@ -176,7 +176,7 @@ const Main = () => {
                 <h1 className="text-2xl font-medium">Funds Management</h1>
                 <p className='text-xs'>Smart Contract on GOERLI Testnet.</p>
                 <a className='text-xs text-indigo-500' href="https://goerli.etherscan.io/address/0xbdC400EE07078b57Ee1F3447dD6981B59Cf041D6">0xbdC400EE07078b57Ee1F3447dD6981B59Cf041D6</a>
-                <p className="mt-4">Balance inside the contract: {balance} ETH</p>
+                <p className="mt-4">Your balance inside the contract: {balance} ETH</p>
                 <div className="mt-6">
                     <input
                         className="w-full p-2 border border-gray-400 rounded-lg"
