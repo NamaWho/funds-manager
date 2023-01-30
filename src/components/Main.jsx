@@ -96,8 +96,8 @@ const abi = [
 const Main = () => {
     const [contract, setContract] = useState(null);
     const [balance, setBalance] = useState(0);
-    const [depositAmount, setDepositAmount] = useState(0);
-    const [withdrawalAmount, setWithdrawalAmount] = useState(0);
+    const [depositAmount, setDepositAmount] = useState(0.001);
+    const [withdrawalAmount, setWithdrawalAmount] = useState(0.001);
 
     useEffect(() => {
         if(!window.ethereum) {
@@ -107,7 +107,8 @@ const Main = () => {
         
         const provider = new ethers.providers.Web3Provider(window.ethereum)
         
-        provider.send('eth_requestAccounts', []);
+        provider.send("eth_requestAccounts", [])
+        .catch((e)=>console.log(e))
 
         const contract = new ethers.Contract(address, abi, provider.getSigner());
     
@@ -169,7 +170,9 @@ const Main = () => {
     return (
         <div className="bg-gray-200 h-screen flex items-center justify-center">
             <div className="bg-white p-6 rounded-lg shadow-md">
-                <h1 className="text-2xl font-medium">Fund Management</h1>
+                <h1 className="text-2xl font-medium">Funds Management</h1>
+                <p className='text-xs'>Smart Contract on GOERLI Testnet.</p>
+                <a className='text-xs text-indigo-500' href="https://goerli.etherscan.io/address/0xbdC400EE07078b57Ee1F3447dD6981B59Cf041D6">0xbdC400EE07078b57Ee1F3447dD6981B59Cf041D6</a>
                 <p className="mt-4">Balance inside the contract: {balance} ETH</p>
                 <div className="mt-6">
                     <input
