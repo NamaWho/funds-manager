@@ -96,8 +96,8 @@ const abi = [
 const Main = () => {
     const [contract, setContract] = useState(null);
     const [balance, setBalance] = useState(0);
-    const [depositAmount, setDepositAmount] = useState(0.001);
-    const [withdrawalAmount, setWithdrawalAmount] = useState(0.001);
+    const [depositAmount, setDepositAmount] = useState("0.001");
+    const [withdrawalAmount, setWithdrawalAmount] = useState("0.001");
 
     useEffect(() => {
         if(!window.ethereum) {
