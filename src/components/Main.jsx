@@ -101,7 +101,7 @@ const Main = () => {
 
     useEffect(() => {
         if(!window.ethereum) {
-            console.log("please install MetaMask")
+            alert("please install MetaMask")
             return
         }
         
@@ -140,33 +140,36 @@ const Main = () => {
         if(err)
             return;
 
+        alert("Waiting for confirmation");
+        
         await tx.wait()
-
+        
         alert("Deposit successful!");
         const balance = await contract.getBalance();
         setBalance(ethers.utils.formatEther(balance));
     };
-
+    
     const handleWithdrawal = async () => {
         if (!contract) return;
         if(!withdrawalAmount) return;
-
+        
         let err = 0;
         const tx =  await contract.withdraw(ethers.utils.parseEther(withdrawalAmount))
-                                .catch((e)=>{
-                                    alert(e);
-                                    err = 1;
-                                });
+                                    .catch((e)=>{
+                                        alert(e);
+                                        err = 1;
+                                    });
         if(err)
             return;
-
+        
+        alert("Waiting for confirmation");
         await tx.wait()
-
+        
         alert("Withdrawal successful!");
         const balance = await contract.getBalance();
         setBalance(ethers.utils.formatEther(balance));
     };
-
+    
     return (
         <div className="bg-gray-200 h-screen flex items-center justify-center">
             <div className="bg-white p-6 rounded-lg shadow-md">
