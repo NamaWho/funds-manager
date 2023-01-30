@@ -104,9 +104,11 @@ const Main = () => {
             console.log("please install MetaMask")
             return
         }
-    
+        
         const provider = new ethers.providers.Web3Provider(window.ethereum)
         
+        provider.send('eth_requestAccounts', []);
+
         const contract = new ethers.Contract(address, abi, provider.getSigner());
     
         setContract(contract)
