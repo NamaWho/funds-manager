@@ -101,7 +101,7 @@ const Main = () => {
     const [balance, setBalance] = useState(0);
     const [depositAmount, setDepositAmount] = useState("0.001");
     const [withdrawalAmount, setWithdrawalAmount] = useState("0.001");
-    const [networkValid, setNetworkValid] = useState(0);
+    const [networkValid, setNetworkValid] = useState(false);
 
     useEffect(() => {
         if(!window.ethereum) {
@@ -116,11 +116,11 @@ const Main = () => {
             const network = await provider.getNetwork();
 
             if(network.name !== "goerli"){
-                setNetworkValid(0);
+                setNetworkValid(false);
                 return;
             }
             
-            setNetworkValid(1);
+            setNetworkValid(true);
         };
         checkNetwork();
 
