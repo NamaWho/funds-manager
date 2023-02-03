@@ -1,103 +1,107 @@
 import React, { useState, useEffect } from 'react';
+import abi from '../utils/abi.js';
+
 const ethers = require("ethers")
 
+// Smart contract address
 const address = "0xbdC400EE07078b57Ee1F3447dD6981B59Cf041D6"
-const abi = [
-	{
-		"inputs": [],
-		"name": "NotOwner",
-		"type": "error"
-	},
-	{
-		"inputs": [],
-		"name": "deposit",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"name": "withdraw",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"inputs": [],
-		"name": "getBalance",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "funder",
-				"type": "address"
-			}
-		],
-		"name": "getBalanceOfFunder",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getOwner",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "MINIMUM_USD",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	}
-]
+// const abi = [
+// 	{
+// 		"inputs": [],
+// 		"name": "NotOwner",
+// 		"type": "error"
+// 	},
+// 	{
+// 		"inputs": [],
+// 		"name": "deposit",
+// 		"outputs": [],
+// 		"stateMutability": "payable",
+// 		"type": "function"
+// 	},
+// 	{
+// 		"inputs": [
+// 			{
+// 				"internalType": "uint256",
+// 				"name": "amount",
+// 				"type": "uint256"
+// 			}
+// 		],
+// 		"name": "withdraw",
+// 		"outputs": [],
+// 		"stateMutability": "nonpayable",
+// 		"type": "function"
+// 	},
+// 	{
+// 		"inputs": [],
+// 		"stateMutability": "nonpayable",
+// 		"type": "constructor"
+// 	},
+// 	{
+// 		"inputs": [],
+// 		"name": "getBalance",
+// 		"outputs": [
+// 			{
+// 				"internalType": "uint256",
+// 				"name": "",
+// 				"type": "uint256"
+// 			}
+// 		],
+// 		"stateMutability": "view",
+// 		"type": "function"
+// 	},
+// 	{
+// 		"inputs": [
+// 			{
+// 				"internalType": "address",
+// 				"name": "funder",
+// 				"type": "address"
+// 			}
+// 		],
+// 		"name": "getBalanceOfFunder",
+// 		"outputs": [
+// 			{
+// 				"internalType": "uint256",
+// 				"name": "",
+// 				"type": "uint256"
+// 			}
+// 		],
+// 		"stateMutability": "view",
+// 		"type": "function"
+// 	},
+// 	{
+// 		"inputs": [],
+// 		"name": "getOwner",
+// 		"outputs": [
+// 			{
+// 				"internalType": "address",
+// 				"name": "",
+// 				"type": "address"
+// 			}
+// 		],
+// 		"stateMutability": "view",
+// 		"type": "function"
+// 	},
+// 	{
+// 		"inputs": [],
+// 		"name": "MINIMUM_USD",
+// 		"outputs": [
+// 			{
+// 				"internalType": "uint256",
+// 				"name": "",
+// 				"type": "uint256"
+// 			}
+// 		],
+// 		"stateMutability": "view",
+// 		"type": "function"
+// 	}
+// ]
 
 const Main = () => {
     const [contract, setContract] = useState(null);
     const [balance, setBalance] = useState(0);
     const [depositAmount, setDepositAmount] = useState("0.001");
     const [withdrawalAmount, setWithdrawalAmount] = useState("0.001");
+    const [networkValid, setNetworkValid] = useState(0);
 
     useEffect(() => {
         if(!window.ethereum) {
@@ -105,14 +109,36 @@ const Main = () => {
             return
         }
         
-        const provider = new ethers.providers.Web3Provider(window.ethereum)
-        
-        provider.send("eth_requestAccounts", [])
-        .catch((e)=>console.log(e))
+        const provider = new ethers.providers.Web3Provider(window.ethereum, "any")
 
-        const contract = new ethers.Contract(address, abi, provider.getSigner());
+        // Network change detection
+        const checkNetwork = async () => {
+            const network = await provider.getNetwork();
+
+            if(network.name !== "goerli"){
+                setNetworkValid(0);
+                return;
+            }
+            
+            setNetworkValid(1);
+        };
+        checkNetwork();
+
+        // Event listener on change of network from Metamask client
+        // Best practice: https://docs.ethers.org/v5/concepts/best-practices/
+        provider.on("network", async (newNetwork, oldNetwork) => {
+            if(oldNetwork)
+                window.location.reload();
+        });
+
+        if(networkValid){
+            provider.send("eth_requestAccounts", [])
+            .catch((e)=>console.log(e))
     
-        setContract(contract)
+            const contract = new ethers.Contract(address, abi, provider.getSigner());
+        
+            setContract(contract)
+        }
     }, [])
 
     useEffect(() => {
@@ -176,6 +202,9 @@ const Main = () => {
                 <h1 className="text-2xl font-medium">Funds Management</h1>
                 <p className='text-xs'>Smart Contract on GOERLI Testnet.</p>
                 <a className='text-xs text-indigo-500' href="https://goerli.etherscan.io/address/0xbdC400EE07078b57Ee1F3447dD6981B59Cf041D6">0xbdC400EE07078b57Ee1F3447dD6981B59Cf041D6</a>
+                
+                {!networkValid && <h1 className='text-red-500 text-sm'>Wrong network selected.<br/> Select Goerli network on your Metamask wallet.</h1>}
+                
                 <p className="mt-4">Your balance inside the contract: {balance} ETH</p>
                 <div className="mt-6">
                     <input
@@ -189,8 +218,9 @@ const Main = () => {
                 <p className='my-1 text-xs'>Deposit at least 5$</p>
                 <div className="">
                     <button
-                        className="w-full py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
+                        className="w-full py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 disabled:bg-gray-300"
                         onClick={handleDeposit}
+                        disabled={!networkValid}
                     >
                         Deposit
                     </button>
@@ -206,8 +236,9 @@ const Main = () => {
                 </div>
                 <div className="mt-4">
                     <button
-                        className="w-full py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
+                        className="w-full py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 disabled:bg-gray-300"
                         onClick={handleWithdrawal}
+                        disabled={!networkValid || !balance}
                     >
                         Withdraw
                     </button>
